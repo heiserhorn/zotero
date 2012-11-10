@@ -1,0 +1,27 @@
+#!/bin/sh
+# Wrapper around xulrunner/firefox to start the xulrunner application conkeror
+# Written by Axel Beckert <abe@deuxchevaux.org> for the Debian Project
+# Adapted by Michele Cane <michele.cane@gmail.com> for zotero-standalone
+
+# Find an appropriate xulrunner binary
+XULRUNNER=''
+for version in `LC_ALL=C seq 5.0 12.0 | tac` 3.6; do
+    XRTMP=`which xulrunner-$version`
+    if [ -n "$XRTMP" -a -x "$XRTMP" ]; then
+	XULRUNNER=$XRTMP
+	break
+    fi
+done
+
+if [ -z "$XULRUNNER" ]; then
+    echo "xulrunner version 3.6 or newer required, but not found. Bailing out." 1>&2
+    exit 1;
+fi
+
+APPLICATION="/usr/share/zotero-standalone/application.ini"
+if [ "$*" = "--help" ]; then
+    errormsg="`exec $XULRUNNER $APPLICATION \"$@\" 2>&1`"
+    echo "$errormsg" | sed -e "s:/[^ ]*/xulrunner-bin:$0:; /-\(width\|height\)/d" 1>&2
+else
+    exec $XULRUNNER $APPLICATION "$@"
+fi

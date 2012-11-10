@@ -1,0 +1,5 @@
+zotero-standalone-build (3.0.6-6-g8978246-1~1) UNRELEASED; urgency=low
+
+  * Initial release (Closes: #504058).
+
+ -- Michele Cane <michele.cane@gmail.com>  Wed, 06 Jun 2012 23:44:32 +0200

@@ -1,0 +1,3 @@
+staging/zotero-standalone	usr/share/
+debian/additions/zotero		usr/bin/
+debian/additions/zotero.desktop	usr/share/applications/

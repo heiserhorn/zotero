@@ -1,0 +1,111 @@
+From: Michele Cane <michele.cane@gmail.com>
+Subject: adapt upstream build.sh to Debian
+Origin: vendor, Debian
+Last-Updated: 2012-01-25
+
+Index: zotero-standalone-build/build.sh
+===================================================================
+--- zotero-standalone-build.orig/build.sh	2012-06-06 23:48:37.000000000 +0200
++++ zotero-standalone-build/build.sh	2012-06-06 23:51:39.000000000 +0200
+@@ -102,8 +102,8 @@
+ 	if [ $? != 0 ]; then
+ 		exit
+ 	fi
+-	REV=`git log -n 1 --pretty='format:%h'`
+-	VERSION="$DEFAULT_VERSION_PREFIX$REV"
++###no-debian	REV=`git log -n 1 --pretty='format:%h'`
++###no-debian	VERSION="$DEFAULT_VERSION_PREFIX$REV"
+ 	find . -depth -type d -name .git -exec rm -rf {} \;
+ 	
+ 	# Windows can't actually symlink; copy instead, with a note
+@@ -139,7 +139,7 @@
+ 	# Copy Zotero directory
+ 	cp -RH "$CALLDIR/modules/zotero" "$BUILDDIR/zotero"
+ 	cd "$BUILDDIR/zotero"
+-	REV=`git log -n 1 --pretty='format:%h'`
++###no-debian	REV=`git log -n 1 --pretty='format:%h'`
+ 	
+ 	if [ -z "$VERSION" ]; then
+ 		VERSION="$DEFAULT_VERSION_PREFIX$REV"
+@@ -419,20 +419,21 @@
+ 
+ # Linux
+ if [ $BUILD_LINUX == 1 ]; then
+-	for arch in "i686" "x86_64"; do
+-		RUNTIME_PATH=`eval echo '$LINUX_'$arch'_RUNTIME_PATH'`
++###no-debian	for arch in "i686" "x86_64"; do
++###no-debian		RUNTIME_PATH=`eval echo '$LINUX_'$arch'_RUNTIME_PATH'`
++		arch=$DEB_BUILD_GNU_CPU
+ 		
+ 		# Set up directory
+ 		echo 'Building Zotero_linux-'$arch
+-		APPDIR="$STAGEDIR/Zotero_linux-$arch"
++		APPDIR="$STAGEDIR/zotero-standalone"
+ 		rm -rf "$APPDIR"
+ 		mkdir "$APPDIR"
+ 		
+ 		# Merge xulrunner and relevant assets
+ 		cp -R "$BUILDDIR/zotero/"* "$BUILDDIR/application.ini" "$APPDIR"
+-		cp -r "$RUNTIME_PATH" "$APPDIR/xulrunner"
+-		mv "$APPDIR/xulrunner/xulrunner-stub" "$APPDIR/zotero"
+-		chmod 755 "$APPDIR/zotero"
++###no-debian		cp -r "$RUNTIME_PATH" "$APPDIR/xulrunner"
++###no-debian		mv "$APPDIR/xulrunner/xulrunner-stub" "$APPDIR/zotero"
++###no-debian		chmod 755 "$APPDIR/zotero"
+ 	
+ 		# Add Unix-specific Standalone assets
+ 		cd "$CALLDIR/assets/unix"
+@@ -440,19 +441,20 @@
+ 		
+ 		# Add word processor plug-ins
+ 		mkdir "$APPDIR/extensions"
+-		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration" "$APPDIR/extensions/zoteroOpenOfficeIntegration@zotero.org"
+-		perl -pi -e 's/SOURCE<\/em:version>/SA.'"$VERSION"'<\/em:version>/' "$APPDIR/extensions/zoteroOpenOfficeIntegration@zotero.org/install.rdf"
++		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration" "$STAGEDIR"
++		perl -pi -e 's/SOURCE<\/em:version>/SA.'"$VERSION"'<\/em:version>/' "$STAGEDIR/zotero-libreoffice-integration/install.rdf"
+ 		
+ 		# Delete extraneous files
+ 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
+ 		find "$APPDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
+-		find "$APPDIR/extensions" -depth -type d -name build -exec rm -rf {} \;
++		find "$STAGEDIR/zotero-libreoffice-integration" -depth -type d -name build -exec rm -rf {} \;
+ 		
+ 		# Add run-zotero.sh
+ 		cp "$CALLDIR/linux/run-zotero.sh" "$APPDIR/run-zotero.sh"
+ 		
+ 		# Move icons, so that updater.png doesn't fail
+-		mv "$APPDIR/xulrunner/icons" "$APPDIR/icons"
++### updater.png in /usr/share/xulrunner-9.0/icons/updater.png
++###no-debian 		mv "$APPDIR/xulrunner/icons" "$APPDIR/icons"
+ 		
+ 		if [ $PACKAGE == 1 ]; then
+ 			# Create tar
+@@ -460,7 +462,7 @@
+ 			cd "$STAGEDIR"
+ 			tar -cjf "$DISTDIR/Zotero-${VERSION}_linux-$arch.tar.bz2" "Zotero_linux-$arch"
+ 		fi
+-	done
++###no-debian	done
+ fi
+ 
+ rm -rf $BUILDDIR
+Index: zotero-standalone-build/config.sh
+===================================================================
+--- zotero-standalone-build.orig/config.sh	2012-06-06 23:48:37.000000000 +0200
++++ zotero-standalone-build/config.sh	2012-06-06 23:50:24.000000000 +0200
+@@ -28,11 +28,12 @@
+ VERSION_NUMERIC="3.0.7"
+ 
+ # Directory for building
+-BUILDDIR="/tmp/zotero-build-`uuidgen | head -c 8`"
++###no-debian BUILDDIR="/tmp/zotero-build-`uuidgen | head -c 8`"
++BUILDDIR="$CALLDIR/build"
+ # Directory for unpacked binaries
+ STAGEDIR="$CALLDIR/staging"
+ # Directory for packed binaries
+ DISTDIR="$CALLDIR/dist"
+ 
+ # Repository URL
+-URL="git://github.com/zotero/zotero.git"
+\ No newline at end of file
++URL="git://github.com/zotero/zotero.git"

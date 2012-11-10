@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Zotero
+GenericName=Bibliography Editor
+Comment=Manage your bibliography
+Exec=zotero
+Icon=zotero
+Terminal=false
+Type=Application
+Categories=Office;
+StartupNotify=true
+
