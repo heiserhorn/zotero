@@ -5,8 +5,8 @@ Last-Updated: 2012-01-25
 
 Index: zotero-standalone-build/build.sh
 ===================================================================
---- zotero-standalone-build.orig/build.sh	2012-11-13 18:48:27.000000000 +0100
-+++ zotero-standalone-build/build.sh	2012-11-13 18:49:29.000000000 +0100
+--- zotero-standalone-build.orig/build.sh	2012-11-13 18:51:02.000000000 +0100
++++ zotero-standalone-build/build.sh	2012-11-13 18:57:01.000000000 +0100
 @@ -102,8 +102,8 @@
  	if [ $? != 0 ]; then
  		exit
@@ -27,7 +27,7 @@ Index: zotero-standalone-build/build.sh
  	
  	if [ -z "$VERSION" ]; then
  		VERSION="$DEFAULT_VERSION_PREFIX$REV"
-@@ -416,20 +416,21 @@
+@@ -416,40 +416,42 @@
  
  # Linux
  if [ $BUILD_LINUX == 1 ]; then
@@ -55,20 +55,21 @@ Index: zotero-standalone-build/build.sh
  	
  		# Add Unix-specific Standalone assets
  		cd "$CALLDIR/assets/unix"
-@@ -437,19 +438,20 @@
+ 		zip -0 -r -q "$APPDIR/chrome/zotero.jar" *
  		
  		# Add word processor plug-ins
- 		mkdir "$APPDIR/extensions"
+-		mkdir "$APPDIR/extensions"
 -		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration" "$APPDIR/extensions/zoteroOpenOfficeIntegration@zotero.org"
 -		perl -pi -e 's/SOURCE<\/em:version>/SA.'"$VERSION"'<\/em:version>/' "$APPDIR/extensions/zoteroOpenOfficeIntegration@zotero.org/install.rdf"
-+		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration" "$STAGEDIR"
-+		perl -pi -e 's/SOURCE<\/em:version>/SA.'"$VERSION"'<\/em:version>/' "$STAGEDIR/zotero-libreoffice-integration/install.rdf"
++###no-debian		mkdir "$APPDIR/extensions"
++###no-debian		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration" "$STAGEDIR"
++###no-debian		perl -pi -e 's/SOURCE<\/em:version>/SA.'"$VERSION"'<\/em:version>/' "$STAGEDIR/zotero-libreoffice-integration/install.rdf"
  		
  		# Delete extraneous files
  		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
  		find "$APPDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
 -		find "$APPDIR/extensions" -depth -type d -name build -exec rm -rf {} \;
-+		find "$STAGEDIR/zotero-libreoffice-integration" -depth -type d -name build -exec rm -rf {} \;
++###no-debian		find "$STAGEDIR/zotero-libreoffice-integration" -depth -type d -name build -exec rm -rf {} \;
  		
  		# Add run-zotero.sh
  		cp "$CALLDIR/linux/run-zotero.sh" "$APPDIR/run-zotero.sh"
@@ -91,8 +92,8 @@ Index: zotero-standalone-build/build.sh
  rm -rf $BUILDDIR
 Index: zotero-standalone-build/config.sh
 ===================================================================
---- zotero-standalone-build.orig/config.sh	2012-11-13 18:48:27.000000000 +0100
-+++ zotero-standalone-build/config.sh	2012-11-13 18:49:29.000000000 +0100
+--- zotero-standalone-build.orig/config.sh	2012-11-13 18:51:02.000000000 +0100
++++ zotero-standalone-build/config.sh	2012-11-13 18:52:38.000000000 +0100
 @@ -34,11 +34,12 @@
  VERSION_NUMERIC="3.0.999"
  
