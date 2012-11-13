@@ -1,5 +1,5 @@
-zotero-standalone-build (3.0.6-6-g8978246-1~1) UNRELEASED; urgency=low
+zotero-standalone-build (3.0.8-6-g854ac34-1) unstable; urgency=low
 
   * Initial release (Closes: #504058).
 
- -- Michele Cane <michele.cane@gmail.com>  Wed, 06 Jun 2012 23:44:32 +0200
+ -- Michele Cane <michele.cane@gmail.com>  Tue, 13 Nov 2012 19:05:24 +0100
