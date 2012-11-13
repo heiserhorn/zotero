@@ -5,8 +5,8 @@ Last-Updated: 2012-01-25
 
 Index: zotero-standalone-build/build.sh
 ===================================================================
---- zotero-standalone-build.orig/build.sh	2012-06-06 23:48:37.000000000 +0200
-+++ zotero-standalone-build/build.sh	2012-06-06 23:51:39.000000000 +0200
+--- zotero-standalone-build.orig/build.sh	2012-11-13 18:48:27.000000000 +0100
++++ zotero-standalone-build/build.sh	2012-11-13 18:49:29.000000000 +0100
 @@ -102,8 +102,8 @@
  	if [ $? != 0 ]; then
  		exit
@@ -27,7 +27,7 @@ Index: zotero-standalone-build/build.sh
  	
  	if [ -z "$VERSION" ]; then
  		VERSION="$DEFAULT_VERSION_PREFIX$REV"
-@@ -419,20 +419,21 @@
+@@ -416,20 +416,21 @@
  
  # Linux
  if [ $BUILD_LINUX == 1 ]; then
@@ -55,7 +55,7 @@ Index: zotero-standalone-build/build.sh
  	
  		# Add Unix-specific Standalone assets
  		cd "$CALLDIR/assets/unix"
-@@ -440,19 +441,20 @@
+@@ -437,19 +438,20 @@
  		
  		# Add word processor plug-ins
  		mkdir "$APPDIR/extensions"
@@ -80,7 +80,7 @@ Index: zotero-standalone-build/build.sh
  		
  		if [ $PACKAGE == 1 ]; then
  			# Create tar
-@@ -460,7 +462,7 @@
+@@ -457,7 +459,7 @@
  			cd "$STAGEDIR"
  			tar -cjf "$DISTDIR/Zotero-${VERSION}_linux-$arch.tar.bz2" "Zotero_linux-$arch"
  		fi
@@ -91,10 +91,10 @@ Index: zotero-standalone-build/build.sh
  rm -rf $BUILDDIR
 Index: zotero-standalone-build/config.sh
 ===================================================================
---- zotero-standalone-build.orig/config.sh	2012-06-06 23:48:37.000000000 +0200
-+++ zotero-standalone-build/config.sh	2012-06-06 23:50:24.000000000 +0200
-@@ -28,11 +28,12 @@
- VERSION_NUMERIC="3.0.7"
+--- zotero-standalone-build.orig/config.sh	2012-11-13 18:48:27.000000000 +0100
++++ zotero-standalone-build/config.sh	2012-11-13 18:49:29.000000000 +0100
+@@ -34,11 +34,12 @@
+ VERSION_NUMERIC="3.0.999"
  
  # Directory for building
 -BUILDDIR="/tmp/zotero-build-`uuidgen | head -c 8`"
