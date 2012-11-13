@@ -20,7 +20,6 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	rm -f staging/zotero-standalone/COPYING
-	rm -f staging/zotero-libreoffice-integration/COPYING
 	dh_auto_install -a
 
 override_dh_auto_clean:
