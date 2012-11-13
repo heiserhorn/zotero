@@ -1,9 +1,0 @@
-Index: zotero-standalone-build/build.sh
-===================================================================
---- zotero-standalone-build.orig/build.sh	2012-02-20 22:07:45.000000000 +0100
-+++ zotero-standalone-build/build.sh	2012-02-20 22:16:30.000000000 +0100
-@@ -445,3 +445,4 @@
- fi
- 
- ###temporary rm -rf $BUILDDIR
-+succhialo
