@@ -1,0 +1,22 @@
+Index: zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js
+===================================================================
+--- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-08 23:05:05.000000000 +0100
++++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-14 21:35:12.000000000 +0100
+@@ -215,7 +215,7 @@
+ 		// -- this way the page won't be displayed when they sync their DB to
+ 		// another profile or if the DB is initialized erroneously (e.g. while
+ 		// switching data directory locations)
+-		else if (Zotero.Prefs.get('firstRun2')) {
++/*		else if (Zotero.Prefs.get('firstRun2')) {
+ 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
+ 				setTimeout(function () {
+ 					if(Zotero.isStandalone) {
+@@ -230,7 +230,7 @@
+ 				Zotero.Prefs.clear('firstRun');
+ 			}
+ 			catch (e) {}
+-		}
++*/		}
+ 		
+ 		// Hide sync debugging menu by default
+ 		if (Zotero.Prefs.get('sync.debugMenu')) {
