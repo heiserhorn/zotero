@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+# unregister the add-on for LibreOffice
+if [ "$1" = "remove" ]; then
+	unopkg remove --shared org.Zotero.integration.openoffice
+fi
+
+#DEBHELPER#
