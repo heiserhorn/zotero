@@ -1,12 +1,12 @@
-Source: zotero-standalone-build
+Source: zotero-standalone
 Section: text
 Priority: optional
 Maintainer: Michele Cane <michele.cane@gmail.com>
 Build-Depends: debhelper (>= 8.0.0), mozilla-devscripts (>= 0.22)
 Standards-Version: 3.9.2
 Homepage: http://www.zotero.org/
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/zotero-standalone-build.git;a=summary
-Vcs-Git: git://anonscm.debian.org/collab-maint/zotero-standalone-build.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/zotero-standalone.git;a=summary
+Vcs-Git: git://anonscm.debian.org/collab-maint/zotero-standalone.git
 
 Package: zotero-standalone
 Architecture: i386 amd64
@@ -26,3 +26,22 @@ Description: organize and share your research sources
  .
  This package contains the standalone version of Zotero which does not
  require any Iceweasel/Firefox browser.
+
+Package: zotero-libreoffice-integration
+Architecture: i386 amd64
+Depends: zotero-standalone | xul-ext-zotero, libreoffice-java-common, ${misc:Depends}, ${xpi:Depends}
+Recommends: ${xpi:Recommends}, libreoffice-writer
+Provides: ${xpi:Provides}
+Enhances: ${xpi:Enhances}
+Description: LibreOffice plugin to organize and share your research sources
+ Zotero is helps you collect, manage,  and cite your research sources.
+ It can automatically gather bibliographic information about resources
+ available in hundreds of databases, library catalogs and the web.
+ .
+ Zotero also allows you to store your libraries online, so that they can be
+ accessed from any computer. Your online collections can also be shared with
+ other Zotero users, letting you collaboratively create bibliographies and
+ research notes.
+ .
+ This package contains the plugin to integrate Zotero in LibreOffice Writer.
+
