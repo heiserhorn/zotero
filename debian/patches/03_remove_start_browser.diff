@@ -1,20 +1,14 @@
 Index: zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 13:45:54.000000000 +0100
-+++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 13:51:24.000000000 +0100
-@@ -217,13 +217,13 @@
- 		// switching data directory locations)
- 		else if (Zotero.Prefs.get('firstRun2')) {
+--- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 16:35:15.000000000 +0100
++++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 16:47:40.000000000 +0100
+@@ -219,7 +219,9 @@
  			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
--				setTimeout(function () {
-+/*				setTimeout(function () {
+ 				setTimeout(function () {
  					if(Zotero.isStandalone) {
++/*
  						ZoteroPane_Local.loadURI("https://www.zotero.org/start_standalone");
++*/
  					} else {
  						gBrowser.selectedTab = gBrowser.addTab("https://www.zotero.org/start");
  					}
--				}, 400);
-+*/				}, 400);
- 			}
- 			Zotero.Prefs.set('firstRun2', false);
- 			try {
