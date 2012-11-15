@@ -1,22 +1,20 @@
 Index: zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-08 23:05:05.000000000 +0100
-+++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-14 21:35:12.000000000 +0100
-@@ -215,7 +215,7 @@
- 		// -- this way the page won't be displayed when they sync their DB to
- 		// another profile or if the DB is initialized erroneously (e.g. while
+--- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 13:45:54.000000000 +0100
++++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-15 13:51:24.000000000 +0100
+@@ -217,13 +217,13 @@
  		// switching data directory locations)
--		else if (Zotero.Prefs.get('firstRun2')) {
-+/*		else if (Zotero.Prefs.get('firstRun2')) {
+ 		else if (Zotero.Prefs.get('firstRun2')) {
  			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
- 				setTimeout(function () {
+-				setTimeout(function () {
++/*				setTimeout(function () {
  					if(Zotero.isStandalone) {
-@@ -230,7 +230,7 @@
- 				Zotero.Prefs.clear('firstRun');
+ 						ZoteroPane_Local.loadURI("https://www.zotero.org/start_standalone");
+ 					} else {
+ 						gBrowser.selectedTab = gBrowser.addTab("https://www.zotero.org/start");
+ 					}
+-				}, 400);
++*/				}, 400);
  			}
- 			catch (e) {}
--		}
-+*/		}
- 		
- 		// Hide sync debugging menu by default
- 		if (Zotero.Prefs.get('sync.debugMenu')) {
+ 			Zotero.Prefs.set('firstRun2', false);
+ 			try {
