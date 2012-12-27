@@ -1,41 +1,6 @@
-# ***** BEGIN LICENSE BLOCK *****
-# Version: MPL 1.1/GPL 2.0/LGPL 2.1
-#
-# The contents of this file are subject to the Mozilla Public License Version
-# 1.1 (the "License"); you may not use this file except in compliance with
-# the License. You may obtain a copy of the License at
-# http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS IS" basis,
-# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-# for the specific language governing rights and limitations under the
-# License.
-#
-# The Original Code is the Mozilla Installer code.
-#
-# The Initial Developer of the Original Code is Mozilla Foundation
-# Portions created by the Initial Developer are Copyright (C) 2006
-# the Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#  Robert Strong <robert.bugzilla@gmail.com>
-#  Ehsan Akhgari <ehsan.akhgari@gmail.com>
-#  Amir Szekely <kichik@gmail.com>
-#
-# Alternatively, the contents of this file may be used under the terms of
-# either the GNU General Public License Version 2 or later (the "GPL"), or
-# the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-# in which case the provisions of the GPL or the LGPL are applicable instead
-# of those above. If you wish to allow use of your version of this file only
-# under the terms of either the GPL or the LGPL, and not to allow others to
-# use your version of this file under the terms of the MPL, indicate your
-# decision by deleting the provisions above and replace them with the notice
-# and other provisions required by the GPL or the LGPL. If you do not delete
-# the provisions above, a recipient may use your version of this file under
-# the terms of any one of the MPL, the GPL or the LGPL.
-#
-# ***** END LICENSE BLOCK *****
-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 ################################################################################
 # Helper defines and macros for toolkit applications
@@ -113,26 +78,19 @@
   !include /NONFATAL WinVer.nsh
 !endif
 
-; Add Windows 7 / 2008 support for versions of WinVer.nsh that don't support
-; them. This can be removed after bug 571381 is fixed.
-!ifndef WINVER_7
-  !define WINVER_7 0x601
-
-  !macro __MOZ__WinVer_DefineOSTests Test
-    !insertmacro __WinVer_DefineOSTest ${Test} 7
-  !macroend
-
-  !insertmacro __MOZ__WinVer_DefineOSTests AtLeast
-  !insertmacro __MOZ__WinVer_DefineOSTests Is
-  !insertmacro __MOZ__WinVer_DefineOSTests AtMost
-!endif
-
 !include x64.nsh
 
 ; NSIS provided macros that we have overridden.
 !include overrides.nsh
 
 !define SHORTCUTS_LOG "shortcuts_log.ini"
+
+; !define SHCNF_DWORD     0x0003
+; !define SHCNF_FLUSH     0x1000
+!define SHCNF_DWORDFLUSH  0x1003
+!ifndef SHCNE_ASSOCCHANGED
+  !define SHCNE_ASSOCCHANGED 0x08000000
+!endif
 
 
 ################################################################################
@@ -1003,185 +961,6 @@
   !define CREATE_KEY_SAM ${KEY_SET_VALUE}|${KEY_WOW64_64KEY}
 !endif
 
-/**
- * Creates a registry key. This will log the actions to the install and
- * uninstall logs. Alternatively you can set a registry value to create the key
- * and then delete the value.
- *
- * Define NO_LOG to prevent all logging when calling this from the uninstaller.
- *
- * @param   _ROOT
- *          The registry key root as defined by NSIS (e.g. HKLM, HKCU, etc.).
- * @param   _KEY
- *          The subkey in relation to the key root.
- * @param   _LOG_UNINSTALL
- *          0 = don't add to uninstall log, 1 = add to uninstall log.
- *
- * $R4 = [out] handle to newly created registry key. If this is not a key
- *       located in one of the predefined registry keys this must be closed
- *       with RegCloseKey (this should not be needed unless someone decides to
- *       do something extremely squirrelly with NSIS).
- * $R5 = return value from RegCreateKeyExW (represented by R5 in the system call).
- * $R6 = [in] hKey passed to RegCreateKeyExW.
- * $R7 = _ROOT
- * $R8 = _KEY
- * $R9 = _LOG_UNINSTALL
- */
-!macro CreateRegKey
-
-  !ifndef ${_MOZFUNC_UN}CreateRegKey
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define ${_MOZFUNC_UN}CreateRegKey "!insertmacro ${_MOZFUNC_UN}CreateRegKeyCall"
-
-    Function ${_MOZFUNC_UN}CreateRegKey
-      Exch $R9
-      Exch 1
-      Exch $R8
-      Exch 2
-      Exch $R7
-      Push $R6
-      Push $R5
-      Push $R4
-
-      StrCmp $R7 "HKCR" +1 +2
-      StrCpy $R6 "0x80000000"
-      StrCmp $R7 "HKCU" +1 +2
-      StrCpy $R6 "0x80000001"
-      StrCmp $R7 "HKLM" +1 +2
-      StrCpy $R6 "0x80000002"
-
-      ; see definition of RegCreateKey
-      System::Call "Advapi32::RegCreateKeyExW(i R6, w R8, i 0, i 0, i 0,\
-                                              i ${CREATE_KEY_SAM}, i 0, *i .R4,\
-                                              i 0) i .R5"
-
-      !ifndef NO_LOG
-        ; if $R5 is not 0 then there was an error creating the registry key.
-        ${If} $R5 <> 0
-          ${LogMsg} "** ERROR Adding Registry Key: $R7 | $R8 **"
-        ${Else}
-          ${If} $R9 == 1 ; add to the uninstall log?
-            ${LogUninstall} "RegKey: $R7 | $R8"
-          ${EndIf}
-          ${LogMsg} "Added Registry Key: $R7 | $R8"
-        ${EndIf}
-      !endif
-
-      StrCmp $R5 0 +1 +2
-      System::Call "Advapi32::RegCloseKey(iR4)"
-
-      Pop $R4
-      Pop $R5
-      Pop $R6
-      Exch $R7
-      Exch 2
-      Exch $R8
-      Exch 1
-      Exch $R9
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro CreateRegKeyCall _ROOT _KEY _LOG_UNINSTALL
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Push "${_ROOT}"
-  Push "${_KEY}"
-  Push "${_LOG_UNINSTALL}"
-  Call CreateRegKey
-  !verbose pop
-!macroend
-
-!macro un.CreateRegKeyCall _ROOT _KEY _LOG_UNINSTALL
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Push "${_ROOT}"
-  Push "${_KEY}"
-  Push "${_LOG_UNINSTALL}"
-  Call un.CreateRegKey
-  !verbose pop
-!macroend
-
-!macro un.CreateRegKey
-  !ifndef un.CreateRegKey
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !undef _MOZFUNC_UN
-    !define _MOZFUNC_UN "un."
-
-    !insertmacro CreateRegKey
-
-    !undef _MOZFUNC_UN
-    !define _MOZFUNC_UN
-    !verbose pop
-  !endif
-!macroend
-
-/**
- * Helper for checking for the existence of a registry key.
- * SHCTX is the root key to search.
- *
- * @param   _MAIN_KEY
- *          Sub key to iterate for the key in question
- * @param   _KEY
- *          Key name to search for
- * @return  _RESULT
- *          'true' / 'false' result
- */
-!macro CheckIfRegistryKeyExists
-  !ifndef CheckIfRegistryKeyExists
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define CheckIfRegistryKeyExists "!insertmacro CheckIfRegistryKeyExistsCall"
-
-    Function CheckIfRegistryKeyExists
-      ; stack: main key, key
-      Exch $R9 ; main key
-      Exch 1
-      Exch $R8 ; key
-      Push $R7
-      Push $R6
-      Push $R5
-
-      StrCpy $R5 "false"
-      StrCpy $R7 "0" # loop index
-      ${Do}
-        EnumRegKey $R6 SHCTX "$R9" "$R7"
-        ${If} "$R6" == "$R8"
-          StrCpy $R5 "true"
-          ${Break}
-        ${EndIf}
-        IntOp $R7 $R7 + 1
-      ${LoopWhile} $R6 != ""
-      ClearErrors
-
-      StrCpy $R9 $R5
-
-      Pop $R5
-      Pop $R6
-      Pop $R7
-      Exch $R8
-      Exch 1
-      Exch $R9
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro CheckIfRegistryKeyExistsCall _MAIN_KEY _KEY _RESULT
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Push "${_KEY}"
-  Push "${_MAIN_KEY}"
-  Call CheckIfRegistryKeyExists
-  Pop ${_RESULT}
-  !verbose pop
-!macroend
-
 ################################################################################
 # Macros for adding file and protocol handlers
 
@@ -1193,7 +972,9 @@
  * @param   _VALOPEN
  *          The path and args to launch the application.
  * @param   _VALICON
- *          The path to an exe that contains an icon and the icon resource id.
+ *          The path to the binary that contains the icon group for the default icon
+ *          followed by a comma and either the icon group's resource index or the icon
+ *          group's resource id prefixed with a minus sign
  * @param   _DISPNAME
  *          The display name for the handler. If emtpy no value will be set.
  * @param   _ISPROTOCOL
@@ -1237,10 +1018,9 @@
       WriteRegStr SHCTX "$R4" "" "$R7"
       WriteRegStr SHCTX "$R4" "FriendlyTypeName" "$R7"
 
-      StrCmp "$R8" "true" +1 +8
+      StrCmp "$R8" "true" +1 +2
       WriteRegStr SHCTX "$R4" "URL Protocol" ""
       StrCpy $R3 ""
-      ClearErrors
       ReadRegDWord $R3 SHCTX "$R4" "EditFlags"
       StrCmp $R3 "" +1 +3  ; Only add EditFlags if a value doesn't exist
       DeleteRegValue SHCTX "$R4" "EditFlags"
@@ -1336,7 +1116,9 @@
  * @param   _VALOPEN
  *          The path and args to launch the application.
  * @param   _VALICON
- *          The path to an exe that contains an icon and the icon resource id.
+ *          The path to the binary that contains the icon group for the default icon
+ *          followed by a comma and either the icon group's resource index or the icon
+ *          group's resource id prefixed with a minus sign
  * @param   _DISPNAME
  *          The display name for the handler. If emtpy no value will be set.
  * @param   _ISPROTOCOL
@@ -1389,10 +1171,9 @@
       WriteRegStr SHCTX "$R0\$R2" "" "$R5"
       WriteRegStr SHCTX "$R0\$R2" "FriendlyTypeName" "$R5"
 
-      StrCmp "$R6" "true" +1 +8
+      StrCmp "$R6" "true" +1 +2
       WriteRegStr SHCTX "$R0\$R2" "URL Protocol" ""
       StrCpy $R1 ""
-      ClearErrors
       ReadRegDWord $R1 SHCTX "$R0\$R2" "EditFlags"
       StrCmp $R1 "" +1 +3  ; Only add EditFlags if a value doesn't exist
       DeleteRegValue SHCTX "$R0\$R2" "EditFlags"
@@ -2456,6 +2237,10 @@
 
       outerdecrement:
       IntOp $R6 $R6 - 1 ; decrement the outer loop's counter when the key is deleted successfully.
+      ; Attempt to delete Software/Zotero. There is nothing we can do if the
+      ; user lacks permissions to delete this key.
+      DeleteRegKey /ifempty SHCTX "$R9"
+      ClearErrors
       GoTo outerloop
 
       end:
@@ -2804,6 +2589,7 @@
       StrCmp "$R7" "$R8" +1 end
       DeleteRegValue HKLM "Software\Classes\$R9\DefaultIcon" ""
       DeleteRegValue HKLM "Software\Classes\$R9\shell\open" ""
+      DeleteRegValue HKLM "Software\Classes\$R9\shell\open\command" ""
       DeleteRegValue HKLM "Software\Classes\$R9\shell\ddeexec" ""
       DeleteRegValue HKLM "Software\Classes\$R9\shell\ddeexec\Application" ""
       DeleteRegValue HKLM "Software\Classes\$R9\shell\ddeexec\Topic" ""
@@ -3291,7 +3077,7 @@
       Pop $R6
       Pop $R7
       Pop $R8
-      Exch $R9
+      Pop $R9
     FunctionEnd
 
     !verbose pop
@@ -4552,7 +4338,8 @@
  * $R6 = general string values, return value from GetTempFileName, return
  *       value from the GetSize macro
  * $R7 = full path to the configuration ini file
- * $R8 = return value from the GetParameters macro
+ * $R8 = used for OS Version and Service Pack detection and the return value
+ *       from the GetParameters macro
  * $R9 = _WARN_UNSUPPORTED_MSG
  */
 !macro InstallOnInitCommon
@@ -4584,12 +4371,23 @@
 
         SetRegView 64
       !else
-        ${Unless} ${AtLeastWin2000}
-          ; XXX-rstrong - some systems fail the AtLeastWin2000 test for an
-          ; unknown reason. To work around this also check if the Windows NT
-          ; registry Key exists and if it does if the first char in
-          ; CurrentVersion is equal to 3 (Windows NT 3.5 and 3.5.1) or 4
-          ; (Windows NT 4).
+        StrCpy $R8 "0"
+        ${If} ${AtMostWin2000}
+          StrCpy $R8 "1"
+        ${EndIf}
+
+        ${If} ${IsWinXP}
+        ${AndIf} ${AtMostServicePack} 1
+          StrCpy $R8 "1"
+        ${EndIf}
+
+        ${If} $R8 == "1"
+          ; XXX-rstrong - some systems failed the AtLeastWin2000 test that we
+          ; used to use for an unknown reason and likely fail the AtMostWin2000
+          ; and possibly the IsWinXP test as well. To work around this also
+          ; check if the Windows NT registry Key exists and if it does if the
+          ; first char in CurrentVersion is equal to 3 (Windows NT 3.5 and
+          ; 3.5.1), to 4 (Windows NT 4) or 5 (Windows 2000 and Windows XP).
           StrCpy $R8 ""
           ClearErrors
           ReadRegStr $R8 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
@@ -4597,6 +4395,7 @@
           ${If} ${Errors}
           ${OrIf} "$R8" == "3"
           ${OrIf} "$R8" == "4"
+          ${OrIf} "$R8" == "5"
             MessageBox MB_OK|MB_ICONSTOP "$R9" IDOK
             ; Nothing initialized so no need to call OnEndCommon
             Quit
@@ -4866,7 +4665,7 @@
 
       finish:
       ${UnloadUAC}
-      System::Call "shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)"
+      System::Call "shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i 0, i 0, i 0)"
       Quit ; Nothing initialized so no need to call OnEndCommon
 
       continue:
@@ -5445,16 +5244,18 @@
       ${LogMsg} "App Version: $R8"
       ${LogMsg} "GRE Version: $R9"
 
-      ${If} ${IsWin2000}
-        ${LogMsg} "OS Name    : Windows 2000"
-      ${ElseIf} ${IsWinXP}
+      ${If} ${IsWinXP}
         ${LogMsg} "OS Name    : Windows XP"
       ${ElseIf} ${IsWin2003}
         ${LogMsg} "OS Name    : Windows 2003"
       ${ElseIf} ${IsWinVista}
         ${LogMsg} "OS Name    : Windows Vista"
-      ${ElseIf} ${AtLeastWinVista} ; Workaround for NSIS 2.33 WinVer.nsh not knowing Win7
-        ${LogMsg} "OS Name    : Windows 7 or above"
+      ${ElseIf} ${IsWin7}
+        ${LogMsg} "OS Name    : Windows 7"
+      ${ElseIf} ${IsWin8}
+        ${LogMsg} "OS Name    : Windows 8"
+      ${ElseIf} ${AtLeastWin8}
+        ${LogMsg} "OS Name    : Above Windows 8"
       ${Else}
         ${LogMsg} "OS Name    : Unable to detect"
       ${EndIf}
@@ -6041,86 +5842,6 @@
 !macroend
 
 /**
- * Checks if any pinned TaskBar lnk files point to the executable's path passed
- * to the macro.
- *
- * @param   _EXE_PATH
- *          The executable path
- * @return  _RESULT
- *          false if no pinned shotcuts were found for this install location.
- *          true if pinned shotcuts were found for this install location.
- *
- * $R5 = stores whether a TaskBar lnk file has been found for the executable
- * $R6 = long path returned from GetShortCutTarget and GetLongPath
- * $R7 = file name returned from FindFirst and FindNext
- * $R8 = find handle for FindFirst and FindNext
- * $R9 = _EXE_PATH and _RESULT
- */
-!macro IsPinnedToTaskBar
-
-  !ifndef IsPinnedToTaskBar
-    !insertmacro GetLongPath
-
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define IsPinnedToTaskBar "!insertmacro IsPinnedToTaskBarCall"
-
-    Function IsPinnedToTaskBar
-      Exch $R9
-      Push $R8
-      Push $R7
-      Push $R6
-      Push $R5
-
-      StrCpy $R5 "false"
-
-      ${If} ${AtLeastWin7}
-      ${AndIf} ${FileExists} "$QUICKLAUNCH\User Pinned\TaskBar"
-        FindFirst $R8 $R7 "$QUICKLAUNCH\User Pinned\TaskBar\*.lnk"
-        ${Do}
-          ${If} ${FileExists} "$QUICKLAUNCH\User Pinned\TaskBar\$R7"
-            ShellLink::GetShortCutTarget "$QUICKLAUNCH\User Pinned\TaskBar\$R7"
-            Pop $R6
-            ${GetLongPath} "$R6" $R6
-            ${If} "$R6" == "$R9"
-              StrCpy $R5 "true"
-              ${ExitDo}
-            ${EndIf}
-          ${EndIf}
-          ClearErrors
-          FindNext $R8 $R7
-          ${If} ${Errors}
-            ${ExitDo}
-          ${EndIf}
-        ${Loop}
-        FindClose $R8
-      ${EndIf}
-
-      ClearErrors
-
-      StrCpy $R9 $R5
-
-      Pop $R5
-      Pop $R6
-      Pop $R7
-      Pop $R8
-      Exch $R9
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro IsPinnedToTaskBarCall _EXE_PATH _RESULT
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Push "${_EXE_PATH}"
-  Call IsPinnedToTaskBar
-  Pop ${_RESULT}
-  !verbose pop
-!macroend
-
-/**
  * Checks if any pinned Start Menu lnk files point to the executable's path
  * passed to the macro.
  *
@@ -6257,67 +5978,6 @@
   !verbose push
   !verbose ${_MOZFUNC_VERBOSE}
   Call PinnedToTaskBarLnkCount
-  Pop ${_RESULT}
-  !verbose pop
-!macroend
-
-/**
- * Gets the number of pinned shortcut lnk files pinned to the Start Menu.
- *
- * @return  _RESULT
- *          number of pinned shortcut lnk files.
- *
- * $R7 = file name returned from FindFirst and FindNext
- * $R8 = find handle for FindFirst and FindNext
- * $R9 = _RESULT
- */
-!macro PinnedToStartMenuLnkCount
-
-  !ifndef PinnedToStartMenuLnkCount
-    !insertmacro GetLongPath
-
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define PinnedToStartMenuLnkCount "!insertmacro PinnedToStartMenuLnkCountCall"
-
-    Function PinnedToStartMenuLnkCount
-      Push $R9
-      Push $R8
-      Push $R7
-
-      StrCpy $R9 0
-
-      ${If} ${AtLeastWin7}
-      ${AndIf} ${FileExists} "$QUICKLAUNCH\User Pinned\StartMenu"
-        FindFirst $R8 $R7 "$QUICKLAUNCH\User Pinned\StartMenu\*.lnk"
-        ${Do}
-          ${If} ${FileExists} "$QUICKLAUNCH\User Pinned\StartMenu\$R7"
-            IntOp $R9 $R9 + 1
-          ${EndIf}
-          ClearErrors
-          FindNext $R8 $R7
-          ${If} ${Errors}
-            ${ExitDo}
-          ${EndIf}
-        ${Loop}
-        FindClose $R8
-      ${EndIf}
-
-      ClearErrors
-
-      Pop $R7
-      Pop $R8
-      Exch $R9
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro PinnedToStartMenuLnkCountCall _RESULT
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Call PinnedToStartMenuLnkCount
   Pop ${_RESULT}
   !verbose pop
 !macroend

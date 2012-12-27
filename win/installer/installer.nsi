@@ -1,38 +1,6 @@
-# ***** BEGIN LICENSE BLOCK *****
-# Version: MPL 1.1/GPL 2.0/LGPL 2.1
-#
-# The contents of this file are subject to the Mozilla Public License Version
-# 1.1 (the "License"); you may not use this file except in compliance with
-# the License. You may obtain a copy of the License at
-# http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS IS" basis,
-# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
-# for the specific language governing rights and limitations under the
-# License.
-#
-# The Original Code is the Mozilla Installer code.
-#
-# The Initial Developer of the Original Code is Mozilla Foundation
-# Portions created by the Initial Developer are Copyright (C) 2006
-# the Initial Developer. All Rights Reserved.
-#
-# Contributor(s):
-#  Robert Strong <robert.bugzilla@gmail.com>
-#
-# Alternatively, the contents of this file may be used under the terms of
-# either the GNU General Public License Version 2 or later (the "GPL"), or
-# the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
-# in which case the provisions of the GPL or the LGPL are applicable instead
-# of those above. If you wish to allow use of your version of this file only
-# under the terms of either the GPL or the LGPL, and not to allow others to
-# use your version of this file under the terms of the MPL, indicate your
-# decision by deleting the provisions above and replace them with the notice
-# and other provisions required by the GPL or the LGPL. If you do not delete
-# the provisions above, a recipient may use your version of this file under
-# the terms of any one of the MPL, the GPL or the LGPL.
-#
-# ***** END LICENSE BLOCK *****
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # Required Plugins:
 # AppAssocReg   http://nsis.sourceforge.net/Application_Association_Registration_plug-in
@@ -111,26 +79,21 @@ VIAddVersionKey "OriginalFilename" "setup.exe"
 !insertmacro CheckForFilesInUse
 !insertmacro CleanUpdatesDir
 !insertmacro CopyFilesFromDir
-!insertmacro CreateRegKey
-!insertmacro GetPathFromString
 !insertmacro GetParent
+!insertmacro GetPathFromString
 !insertmacro IsHandlerForInstallDir
-!insertmacro IsPinnedToTaskBar
 !insertmacro LogDesktopShortcut
 !insertmacro LogQuickLaunchShortcut
 !insertmacro LogStartMenuShortcut
 !insertmacro ManualCloseAppPrompt
-!insertmacro PinnedToStartMenuLnkCount
-!insertmacro RegCleanAppHandler
 !insertmacro RegCleanMain
 !insertmacro RegCleanUninstall
 !insertmacro SetAppLSPCategories
 !insertmacro SetBrandNameVars
-!insertmacro UpdateShortcutAppModelIDs
 !insertmacro UnloadUAC
-!insertmacro WriteRegStr2
+!insertmacro UpdateShortcutAppModelIDs
 !insertmacro WriteRegDWORD2
-!insertmacro CheckIfRegistryKeyExists
+!insertmacro WriteRegStr2
 
 !include shared.nsh
 
@@ -353,30 +316,11 @@ Section "-Application" APP_IDX
   ; Register zotero protocol handler
   ${SetHandlers}
 
-  ; The following keys should only be set if we can write to HKLM
-  ${If} $TmpVal == "HKLM"
-    ; If we are writing to HKLM and create either the desktop or start menu
-    ; shortcuts set IconsVisible to 1 otherwise to 0.
-    ${StrFilter} "${FileMainEXE}" "+" "" "" $R9
-    StrCpy $0 "Software\Clients\StartMenuInternet\$R9\InstallInfo"
-    ${If} $AddDesktopSC == ${DESKTOP_SHORTCUT_ENABLED}
-    ${OrIf} $AddStartMenuSC == ${START_MENU_SHORTCUT_ENABLED}
-      WriteRegDWORD HKLM "$0" "IconsVisible" 1
-    ${Else}
-      WriteRegDWORD HKLM "$0" "IconsVisible" 0
-    ${EndIf}
-  ${EndIf}
-
   ; These need special handling on uninstall since they may be overwritten by
   ; an install into a different location.
   StrCpy $0 "Software\Microsoft\Windows\CurrentVersion\App Paths\${FileMainEXE}"
   ${WriteRegStr2} $TmpVal "$0" "" "$INSTDIR\${FileMainEXE}" 0
   ${WriteRegStr2} $TmpVal "$0" "Path" "$INSTDIR" 0
-
-  StrCpy $0 "Software\Microsoft\MediaPlayer\ShimInclusionList\$R9"
-  ${CreateRegKey} "$TmpVal" "$0" 0
-  StrCpy $0 "Software\Microsoft\MediaPlayer\ShimInclusionList\plugin-container.exe"
-  ${CreateRegKey} "$TmpVal" "$0" 0
 
   ${If} $TmpVal == "HKLM"
     ; Set the permitted LSP Categories for WinVista and above
@@ -420,7 +364,7 @@ Section "-Application" APP_IDX
   ${Unless} ${Errors}
     GetFunctionAddress $0 FixShortcutAppModelIDs
     UAC::ExecCodeSegment $0
-  ${EndIf}
+  ${EndUnless}
 
   ; UAC only allows elevating to an Admin account so there is no need to add
   ; the Start Menu or Desktop shortcuts from the original unelevated process
@@ -482,14 +426,8 @@ Section "-InstallEndCleanup"
   DetailPrint "$(STATUS_CLEANUP)"
   SetDetailsPrint none
 
-  ; Adds a pinned Task Bar shortcut (see MigrateTaskBarShortcut for details).
-  ${MigrateTaskBarShortcut}
-
-  ${GetShortcutsLogPath} $0
-  WriteIniStr "$0" "TASKBAR" "Migrated" "true"
-
   ; Refresh desktop icons
-  System::Call "shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)"
+  System::Call "shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i ${SHCNF_DWORDFLUSH}, i 0, i 0)"
 
   ${InstallEndCleanupCommon}
 
@@ -656,12 +594,13 @@ Function CheckExistingInstall
 FunctionEnd
 
 Function LaunchApp
+  ${ManualCloseAppPrompt} "${WindowClass}" "$(WARN_MANUALLY_CLOSE_APP_LAUNCH)"
+
   ClearErrors
   ${GetParameters} $0
   ${GetOptions} "$0" "/UAC:" $1
   ${If} ${Errors}
-    ${ManualCloseAppPrompt} "${WindowClass}" "$(WARN_MANUALLY_CLOSE_APP_LAUNCH)"
-    Exec "$INSTDIR\${FileMainEXE}"
+    Exec "$\"$INSTDIR\${FileMainEXE}$\""
   ${Else}
     GetFunctionAddress $0 LaunchAppFromElevatedProcess
     UAC::ExecCodeSegment $0
@@ -669,8 +608,6 @@ Function LaunchApp
 FunctionEnd
 
 Function LaunchAppFromElevatedProcess
-  ${ManualCloseAppPrompt} "${WindowClass}" "$(WARN_MANUALLY_CLOSE_APP_LAUNCH)"
-
   ; Find the installation directory when launching using GetFunctionAddress
   ; from an elevated installer since $INSTDIR will not be set in this installer
   ReadRegStr $0 HKLM "Software\Classes\zotero\DefaultIcon" ""
@@ -679,7 +616,7 @@ Function LaunchAppFromElevatedProcess
   ; Set our current working directory to the application's install directory
   ; otherwise the 7-Zip temp directory will be in use and won't be deleted.
   SetOutPath "$1"
-  Exec "$0"
+  Exec "$\"$0$\""
 FunctionEnd
 
 ################################################################################
@@ -860,18 +797,6 @@ Function preSummary
     ${If} $TmpVal == "HKLM"
       SetShellVarContext all ; Set SHCTX to all users
     ${EndIf}
-    ; If Firefox isn't the http handler for this user show the option to set
-    ; Firefox as the default browser.
-    #${If} "$R9" != "true"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Settings" NumFields "4"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Type   "checkbox"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Text   "$(SUMMARY_TAKE_DEFAULTS)"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Left   "0"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Right  "-1"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" State  "1"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Top    "32"
-    #  WriteINIStr "$PLUGINSDIR\summary.ini" "Field 4" Bottom "53"
-    #${EndIf}
   ${EndUnless}
 
   ${If} "$TmpVal" == "true"
@@ -950,7 +875,7 @@ Function .onInit
 
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Type   "RadioButton"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Text   "$(OPTION_STANDARD_RADIO)"
-  WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Left   "15"
+  WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Left   "0"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Right  "-1"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Top    "25"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 2" Bottom "35"
@@ -959,7 +884,7 @@ Function .onInit
 
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Type   "RadioButton"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Text   "$(OPTION_CUSTOM_RADIO)"
-  WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Left   "15"
+  WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Left   "0"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Right  "-1"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Top    "55"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 3" Bottom "65"
@@ -967,14 +892,14 @@ Function .onInit
 
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Type   "label"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Text   "$(OPTION_STANDARD_DESC)"
-  WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Left   "30"
+  WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Left   "15"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Right  "-1"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Top    "37"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 4" Bottom "57"
 
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Type   "label"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Text   "$(OPTION_CUSTOM_DESC)"
-  WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Left   "30"
+  WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Left   "15"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Right  "-1"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Top    "67"
   WriteINIStr "$PLUGINSDIR\options.ini" "Field 5" Bottom "87"
@@ -996,7 +921,7 @@ Function .onInit
 
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Type   "checkbox"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Text   "$(ICONS_DESKTOP)"
-  WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Left   "15"
+  WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Left   "0"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Right  "-1"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Top    "20"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 2" Bottom "30"
@@ -1013,7 +938,7 @@ Function .onInit
 
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Type   "checkbox"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Text   "$(ICONS_STARTMENU)"
-  WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Left   "15"
+  WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Left   "0"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Right  "-1"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Top    "40"
   WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 3" Bottom "50"
@@ -1030,7 +955,7 @@ Function .onInit
   ${Unless} ${AtLeastWin7}
     WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Type   "checkbox"
     WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Text   "$(ICONS_QUICKLAUNCH)"
-    WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Left   "15"
+    WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Left   "0"
     WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Right  "-1"
     WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Top    "60"
     WriteINIStr "$PLUGINSDIR\shortcuts.ini" "Field 4" Bottom "70"
