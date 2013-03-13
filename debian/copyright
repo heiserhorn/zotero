@@ -1,4 +1,4 @@
-Format: http://dep.debian.net/deps/dep5/
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Zotero Standalone Build
 Upstream-Contact: Center for History and New Media, George Mason University, Fairfax, Virginia, USA <chnm@gmu.edu>
 Source: http://www.zotero.org/support/dev/client_coding/building_the_standalone_client
@@ -27,9 +27,9 @@ License: LGPL-2.1
 
 Files: modules/zotero/chrome/content/zotero/tinymce/tiny_mce.js
 Copyright: sizzle-js is Copyright 2009, The Dojo Foundation
-Copyright: anything else in the file is Copyright 2003-2011, Moxiecode Systems AB
+ anything else in the file is Copyright 2003-2011, Moxiecode Systems AB
 License: sizzle-js is MIT or BSD or GPL
-License: anything else in the file is LGPL-2.1
+ anything else in the file is LGPL-2.1
 
 Files: modules/zotero/chrome/content/zotero/webpagedump/*
 Copyright: 2004, Gomita <gomita@xuldev.org>
