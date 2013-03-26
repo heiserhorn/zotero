@@ -2793,116 +2793,6 @@
 !macroend
 
 /**
- * Removes the application's VirtualStore directory if present when the
- * installation directory is a sub-directory of the program files directory.
- *
- * $R4 = $PROGRAMFILES/$PROGRAMFILES64 for CleanVirtualStore_Internal
- * $R5 = various path values.
- * $R6 = length of the long path to $PROGRAMFILES32 or $PROGRAMFILES64
- * $R7 = long path to $PROGRAMFILES32 or $PROGRAMFILES64
- * $R8 = length of the long path to $INSTDIR
- * $R9 = long path to $INSTDIR
- */
-!macro CleanVirtualStore
-
-  !ifndef ${_MOZFUNC_UN}CleanVirtualStore
-    !define _MOZFUNC_UN_TMP ${_MOZFUNC_UN}
-    !insertmacro ${_MOZFUNC_UN_TMP}GetLongPath
-    !undef _MOZFUNC_UN
-    !define _MOZFUNC_UN ${_MOZFUNC_UN_TMP}
-    !undef _MOZFUNC_UN_TMP
-
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define ${_MOZFUNC_UN}CleanVirtualStore "!insertmacro ${_MOZFUNC_UN}CleanVirtualStoreCall"
-
-    Function ${_MOZFUNC_UN}CleanVirtualStore
-      Push $R9
-      Push $R8
-      Push $R7
-      Push $R6
-      Push $R5
-      Push $R4
-
-      ${${_MOZFUNC_UN}GetLongPath} "$INSTDIR" $R9
-      ${If} "$R9" != ""
-        StrLen $R8 "$R9"
-
-        StrCpy $R4 $PROGRAMFILES32
-        Call ${_MOZFUNC_UN}CleanVirtualStore_Internal
-
-        ${If} ${RunningX64}
-          StrCpy $R4 $PROGRAMFILES64
-          Call ${_MOZFUNC_UN}CleanVirtualStore_Internal
-        ${EndIf}
-
-      ${EndIf}
-
-      ClearErrors
-
-      Pop $R4
-      Pop $R5
-      Pop $R6
-      Pop $R7
-      Pop $R8
-      Pop $R9
-    FunctionEnd
-
-    Function ${_MOZFUNC_UN}CleanVirtualStore_Internal
-      ${${_MOZFUNC_UN}GetLongPath} "" $R7
-      ${If} "$R7" != ""
-        StrLen $R6 "$R7"
-        ${If} $R8 < $R6
-          ; Copy from the start of $INSTDIR the length of $PROGRAMFILES64
-          StrCpy $R5 "$R9" $R6
-          ${If} "$R5" == "$R7"
-            ; Remove the drive letter and colon from the $INSTDIR long path
-            StrCpy $R5 "$R9" "" 2
-            StrCpy $R5 "$LOCALAPPDATA\VirtualStore$R5"
-            ${${_MOZFUNC_UN}GetLongPath} "$R5" $R5
-            ${If} "$R5" != ""
-            ${AndIf} ${FileExists} "$R5"
-              RmDir /r "$R5"
-            ${EndIf}
-          ${EndIf}
-        ${EndIf}
-      ${EndIf}
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro CleanVirtualStoreCall
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Call CleanVirtualStore
-  !verbose pop
-!macroend
-
-!macro un.CleanVirtualStoreCall
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Call un.CleanVirtualStore
-  !verbose pop
-!macroend
-
-!macro un.CleanVirtualStore
-  !ifndef un.CleanVirtualStore
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !undef _MOZFUNC_UN
-    !define _MOZFUNC_UN "un."
-
-    !insertmacro CleanVirtualStore
-
-    !undef _MOZFUNC_UN
-    !define _MOZFUNC_UN
-    !verbose pop
-  !endif
-!macroend
-
-/**
  * If present removes the updates directory located in the profile's local
  * directory for this installation.
  *
@@ -4520,211 +4410,6 @@
 !macroend
 
 /**
- * Called from the uninstaller's .onInit function not to be confused with the
- * installer's .onInit or the uninstaller's un.onInit functions.
- */
-!macro UninstallOnInitCommon
-
-  !ifndef UninstallOnInitCommon
-    !insertmacro ElevateUAC
-    !insertmacro GetLongPath
-    !insertmacro GetOptions
-    !insertmacro GetParameters
-    !insertmacro GetParent
-    !insertmacro UnloadUAC
-    !insertmacro UpdateShortcutAppModelIDs
-    !insertmacro UpdateUninstallLog
-
-    !verbose push
-    !verbose ${_MOZFUNC_VERBOSE}
-    !define UninstallOnInitCommon "!insertmacro UninstallOnInitCommonCall"
-
-    Function UninstallOnInitCommon
-      ; Prevents breaking apps that don't use SetBrandNameVars
-      !ifdef SetBrandNameVars
-        ${SetBrandNameVars} "$EXEDIR\distribution\setup.ini"
-      !endif
-
-      ; Prevent launching the application when a reboot is required and this
-      ; executable is the main application executable
-      IfFileExists "$EXEDIR\${FileMainEXE}.moz-upgrade" +1 +4
-      MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
-      Reboot
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      ${GetParent} "$EXEDIR" $INSTDIR
-      ${GetLongPath} "$INSTDIR" $INSTDIR
-      IfFileExists "$INSTDIR\${FileMainEXE}" +2 +1
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      ; Prevents breaking apps that don't use SetBrandNameVars
-      !ifdef SetBrandNameVars
-        ${SetBrandNameVars} "$INSTDIR\distribution\setup.ini"
-      !endif
-
-      ; Application update uses a directory named tobedeleted in the $INSTDIR to
-      ; delete files on OS reboot when they are in use. Try to delete this
-      ; directory if it exists.
-      ${If} ${FileExists} "$INSTDIR\tobedeleted"
-        RmDir /r "$INSTDIR\tobedeleted"
-      ${EndIf}
-
-      ; Prevent all operations (e.g. set as default, postupdate, etc.) when a
-      ; reboot is required and the executable launched is helper.exe
-      IfFileExists "$INSTDIR\${FileMainEXE}.moz-upgrade" +1 +4
-      MessageBox MB_YESNO|MB_ICONEXCLAMATION "$(WARN_RESTART_REQUIRED_UPGRADE)" IDNO +2
-      Reboot
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      !ifdef HAVE_64BIT_OS
-        SetRegView 64
-      !endif
-
-      ${GetParameters} $R0
-
-      StrCmp "$R0" "" continue +1
-
-      ; Update this user's shortcuts with the latest app user model id.
-      ClearErrors
-      ${GetOptions} "$R0" "/UpdateShortcutAppUserModelIds" $R2
-      IfErrors hideshortcuts +1
-      ${UpdateShortcutAppModelIDs}  "$INSTDIR\${FileMainEXE}" "${AppUserModelID}" $R2
-      StrCmp "$R2" "true" finish +1 ; true indicates that shortcuts have been updated
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      ; Require elevation if the user can elevate
-      hideshortcuts:
-      ClearErrors
-      ${GetOptions} "$R0" "/HideShortcuts" $R2
-      IfErrors showshortcuts +1
-!ifndef NONADMIN_ELEVATE
-      ${ElevateUAC}
-!endif
-      ${HideShortcuts}
-      GoTo finish
-
-      ; Require elevation if the user can elevate
-      showshortcuts:
-      ClearErrors
-      ${GetOptions} "$R0" "/ShowShortcuts" $R2
-      IfErrors defaultappuser +1
-!ifndef NONADMIN_ELEVATE
-      ${ElevateUAC}
-!endif
-      ${ShowShortcuts}
-      GoTo finish
-
-      ; Require elevation if the the StartMenuInternet registry keys require
-      ; updating and the user can elevate
-      defaultappuser:
-      ClearErrors
-      ${GetOptions} "$R0" "/SetAsDefaultAppUser" $R2
-      IfErrors defaultappglobal +1
-      ${SetAsDefaultAppUser}
-      GoTo finish
-
-      ; Require elevation if the user can elevate
-      defaultappglobal:
-      ClearErrors
-      ${GetOptions} "$R0" "/SetAsDefaultAppGlobal" $R2
-      IfErrors postupdate +1
-      ${ElevateUAC}
-      ${SetAsDefaultAppGlobal}
-      GoTo finish
-
-      ; Do not attempt to elevate. The application launching this executable is
-      ; responsible for elevation if it is required.
-      postupdate:
-      ${WordReplace} "$R0" "$\"" "" "+" $R0
-      ClearErrors
-      ${GetOptions} "$R0" "/PostUpdate" $R2
-      IfErrors continue +1
-      ; If the uninstall.log does not exist don't perform post update
-      ; operations. This prevents updating the registry for zip builds.
-      IfFileExists "$EXEDIR\uninstall.log" +2 +1
-      Quit ; Nothing initialized so no need to call OnEndCommon
-      ${PostUpdate}
-      ClearErrors
-      ${GetOptions} "$R0" "/UninstallLog=" $R2
-      IfErrors updateuninstalllog +1
-      StrCmp "$R2" "" finish +1
-      GetFullPathName $R3 "$R2"
-      IfFileExists "$R3" +1 finish
-      Delete "$INSTDIR\uninstall\*wizard*"
-      Delete "$INSTDIR\uninstall\uninstall.log"
-      CopyFiles /SILENT /FILESONLY "$R3" "$INSTDIR\uninstall\"
-      ${GetParent} "$R3" $R4
-      Delete "$R3"
-      RmDir "$R4"
-      GoTo finish
-
-      ; Do not attempt to elevate. The application launching this executable is
-      ; responsible for elevation if it is required.
-      updateuninstalllog:
-      ${UpdateUninstallLog}
-
-      finish:
-      ${UnloadUAC}
-      System::Call "shell32::SHChangeNotify(i ${SHCNE_ASSOCCHANGED}, i 0, i 0, i 0)"
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      continue:
-
-      ; If the uninstall.log does not exist don't perform uninstall
-      ; operations. This prevents running the uninstaller for zip builds.
-      IfFileExists "$INSTDIR\uninstall\uninstall.log" +2 +1
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-      ; Require elevation if the user can elevate
-      ${ElevateUAC}
-
-      ; If we made it this far then this installer is being used as an uninstaller.
-      WriteUninstaller "$EXEDIR\uninstaller.exe"
-
-      ${Unless} ${Silent}
-        ; Manually check for /S in the command line due to Bug 506867
-        ClearErrors
-        ${GetOptions} "$R0" "/S" $R2
-        ${Unless} ${Errors}
-          SetSilent silent
-        ${Else}
-          ; Support for the deprecated -ms command line argument.
-          ClearErrors
-          ${GetOptions} "$R0" "-ms" $R2
-          ${Unless} ${Errors}
-            SetSilent silent
-          ${EndUnless}
-        ${EndUnless}
-      ${EndUnless}
-
-      ${If} ${Silent}
-        StrCpy $R1 "$\"$EXEDIR\uninstaller.exe$\" /S"
-      ${Else}
-        StrCpy $R1 "$\"$EXEDIR\uninstaller.exe$\""
-      ${EndIf}
-
-      ; When the uninstaller is launched it copies itself to the temp directory
-      ; so it won't be in use so it can delete itself.
-      ExecWait $R1
-      ${DeleteFile} "$EXEDIR\uninstaller.exe"
-      ${UnloadUAC}
-      SetErrorLevel 0
-      Quit ; Nothing initialized so no need to call OnEndCommon
-
-    FunctionEnd
-
-    !verbose pop
-  !endif
-!macroend
-
-!macro UninstallOnInitCommonCall
-  !verbose push
-  !verbose ${_MOZFUNC_VERBOSE}
-  Call UninstallOnInitCommon
-  !verbose pop
-!macroend
-
-/**
  * Called from the uninstaller's un.onInit function not to be confused with the
  * installer's .onInit or the uninstaller's .onInit functions.
  */
@@ -4850,7 +4535,6 @@
 !macro InstallStartCleanupCommon
 
   !ifndef InstallStartCleanupCommon
-    !insertmacro CleanVirtualStore
     !insertmacro EndUninstallLog
     !insertmacro OnInstallUninstall
 
@@ -4890,10 +4574,6 @@
       ${If} ${FileExists} "$INSTDIR\tobedeleted"
         RmDir /r "$INSTDIR\tobedeleted"
       ${EndIf}
-
-      ; Remove files that may be left behind by the application in the
-      ; VirtualStore directory.
-      ${CleanVirtualStore}
     FunctionEnd
 
     !verbose pop
@@ -5803,7 +5483,7 @@
       Pop $R6
       Pop $R7
       Pop $R8
-      Exch $R9
+      Pop $R9
     FunctionEnd
 
     !verbose pop

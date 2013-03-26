@@ -4,7 +4,8 @@ BUILD_WIN32=1
 BUILD_LINUX=1
 
 # Version of Gecko to build with
-GECKO_VERSION="17.0"
+GECKO_VERSION="20.0b6"
+GECKO_SHORT_VERSION="20.0"
 
 # Paths to Gecko runtimes
 MAC_RUNTIME_PATH="`pwd`/xulrunner/XUL.framework"
@@ -25,13 +26,14 @@ UPX='C:\Program Files (x86)\upx\upx.exe'
 EXE7ZIP='C:\Program Files\7-Zip\7z.exe'
 
 # Paths for Windows installer build only necessary for signed binaries
-SIGNTOOL='C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\signtool.exe'
+#SIGNTOOL='C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\signtool.exe'
+SIGNTOOL='C:\Program Files (x86)\Windows Kits\8.0\bin\x86\signtool.exe'
 SIGNATURE_URL='https://www.zotero.org/'
 
 # If version is not specified on the command line, version is this prefix followed by the revision
-DEFAULT_VERSION_PREFIX="3.0.999.SOURCE."
+DEFAULT_VERSION_PREFIX="3.1.999.SOURCE."
 # Numeric version for OS X bundle
-VERSION_NUMERIC="3.0.999"
+VERSION_NUMERIC="3.1.999"
 
 # Directory for building
 BUILDDIR="/tmp/zotero-build-`uuidgen | head -c 8`"
