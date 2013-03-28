@@ -1,8 +1,8 @@
 Index: zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-11-30 14:11:35.000000000 +0100
-+++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2012-12-27 17:50:42.000000000 +0100
-@@ -226,7 +226,9 @@
+--- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/zoteroPane.js	2013-03-28 17:30:42.000000000 +0100
++++ zotero-standalone-build/modules/zotero/chrome/content/zotero/zoteroPane.js	2013-03-28 17:30:42.000000000 +0100
+@@ -220,7 +220,9 @@
  			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
  				setTimeout(function () {
  					if(Zotero.isStandalone) {

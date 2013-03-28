@@ -1,8 +1,8 @@
 Index: zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero-libreoffice-integration/resource/installer.jsm	2012-11-30 14:11:36.000000000 +0100
-+++ zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm	2012-12-27 17:50:42.000000000 +0100
-@@ -187,13 +187,19 @@
+--- zotero-standalone-build.orig/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-03-28 17:24:03.000000000 +0100
++++ zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-03-28 17:24:03.000000000 +0100
+@@ -191,13 +191,19 @@
  				if(success) {
  					zpi.success();
  				} else {
@@ -24,10 +24,3 @@ Index: zotero-standalone-build/modules/zotero-libreoffice-integration/resource/i
  		}
  	}
  	
-@@ -353,4 +359,4 @@
- 			}});
- 		}});
- 	}
--}
-\ No newline at end of file
-+}
