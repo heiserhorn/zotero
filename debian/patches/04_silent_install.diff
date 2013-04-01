@@ -1,7 +1,7 @@
 Index: zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-03-28 17:24:03.000000000 +0100
-+++ zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-03-28 17:24:03.000000000 +0100
+--- zotero-standalone-build.orig/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-04-01 21:35:13.000000000 +0200
++++ zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-04-01 21:35:13.000000000 +0200
 @@ -191,13 +191,19 @@
  				if(success) {
  					zpi.success();

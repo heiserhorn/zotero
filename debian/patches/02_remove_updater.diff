@@ -1,7 +1,7 @@
 Index: zotero-standalone-build/assets/prefs.js
 ===================================================================
---- zotero-standalone-build.orig/assets/prefs.js	2013-03-28 17:39:36.000000000 +0100
-+++ zotero-standalone-build/assets/prefs.js	2013-03-28 17:39:36.000000000 +0100
+--- zotero-standalone-build.orig/assets/prefs.js	2013-04-01 21:36:00.000000000 +0200
++++ zotero-standalone-build/assets/prefs.js	2013-04-01 21:36:00.000000000 +0200
 @@ -77,7 +77,7 @@
  
  /** The below is imported from https://developer.mozilla.org/en/XULRunner/Application_Update **/
@@ -20,8 +20,8 @@ Index: zotero-standalone-build/assets/prefs.js
 +pref("app.update.channel", "default");
 Index: zotero-standalone-build/modules/zotero/chrome/content/zotero/standalone/standalone.xul
 ===================================================================
---- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/standalone/standalone.xul	2013-03-28 17:39:36.000000000 +0100
-+++ zotero-standalone-build/modules/zotero/chrome/content/zotero/standalone/standalone.xul	2013-03-28 17:39:36.000000000 +0100
+--- zotero-standalone-build.orig/modules/zotero/chrome/content/zotero/standalone/standalone.xul	2013-04-01 21:36:00.000000000 +0200
++++ zotero-standalone-build/modules/zotero/chrome/content/zotero/standalone/standalone.xul	2013-04-01 21:36:00.000000000 +0200
 @@ -197,10 +197,12 @@
  									  accesskey="&helpReportErrors.accesskey;"
  									  label="&helpReportErrors.label;"
