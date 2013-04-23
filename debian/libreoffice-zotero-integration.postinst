@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+# register the add-on for LibreOffice
+if [ "$1" = "configure" ]; then
+	mkdir /usr/lib/libreoffice/share/extensions/Zotero_OpenOffice_Integration
+	unzip /usr/share/xul-ext/libreoffice-zotero-integration/install/Zotero_OpenOffice_Integration.oxt -d /usr/lib/libreoffice/share/extensions/Zotero_OpenOffice_Integration
+fi
+
+#DEBHELPER#

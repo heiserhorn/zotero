@@ -10,8 +10,8 @@ Vcs-Git: git://anonscm.debian.org/collab-maint/zotero-standalone.git
 
 Package: zotero-standalone
 Architecture: i386 amd64
-Depends: xulrunner-12.0 | xulrunner-19.0, ${misc:Depends}
-Enhances: zotero-libreoffice-integration
+Depends: xulrunner-12.0 | xulrunner-20.0, ${misc:Depends}
+Enhances: libreoffice-libreoffice-integration
 Description: organize and share your research sources
  Zotero is helps you collect, manage,  and cite your research sources.
  It can automatically gather bibliographic information about resources
@@ -25,9 +25,9 @@ Description: organize and share your research sources
  This package contains the standalone version of Zotero which does not
  require any Iceweasel/Firefox browser.
 
-Package: zotero-libreoffice-integration
+Package: libreoffice-zotero-integration
 Architecture: i386 amd64
-Depends: zotero-standalone | xul-ext-zotero, libreoffice-java-common, ${misc:Depends}
+Depends: zotero-standalone | xul-ext-zotero, libreoffice-java-common, unzip, ${misc:Depends}
 Recommends: libreoffice-writer
 Description: LibreOffice plugin to organize and share your research sources
  Zotero is helps you collect, manage,  and cite your research sources.

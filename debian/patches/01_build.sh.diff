@@ -5,8 +5,8 @@ Last-Updated: 2012-01-25
 
 Index: zotero-standalone-build/build.sh
 ===================================================================
---- zotero-standalone-build.orig/build.sh	2013-04-01 21:35:48.000000000 +0200
-+++ zotero-standalone-build/build.sh	2013-04-01 21:35:48.000000000 +0200
+--- zotero-standalone-build.orig/build.sh	2013-04-23 12:21:20.000000000 +0200
++++ zotero-standalone-build/build.sh	2013-04-23 12:21:20.000000000 +0200
 @@ -102,8 +102,8 @@
  	if [ $? != 0 ]; then
  		exit
@@ -91,10 +91,10 @@ Index: zotero-standalone-build/build.sh
  rm -rf $BUILDDIR
 Index: zotero-standalone-build/config.sh
 ===================================================================
---- zotero-standalone-build.orig/config.sh	2013-04-01 21:35:48.000000000 +0200
-+++ zotero-standalone-build/config.sh	2013-04-01 21:35:48.000000000 +0200
+--- zotero-standalone-build.orig/config.sh	2013-04-23 12:21:20.000000000 +0200
++++ zotero-standalone-build/config.sh	2013-04-23 12:21:20.000000000 +0200
 @@ -36,7 +36,8 @@
- VERSION_NUMERIC="3.1.999"
+ VERSION_NUMERIC="4.0.999"
  
  # Directory for building
 -BUILDDIR="/tmp/zotero-build-`uuidgen | head -c 8`"

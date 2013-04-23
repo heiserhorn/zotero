@@ -1,8 +1,8 @@
-zotero-standalone-build (3.0.14.1-6-g4a2b776-42-g5dc034c-1) UNRELEASED; urgency=low
+zotero-standalone-build (4.0.6-1~1) UNRELEASED; urgency=low
 
-  * New Upstream release.
+  * New Upstream release (Closes: #706006 #7060079.
 
- -- Michele Cane <michele.cane@gmail.com>  Thu, 28 Mar 2013 17:53:07 +0100
+ -- Michele Cane <michele.cane@gmail.com>  Tue, 23 Apr 2013 12:22:14 +0200
 
 zotero-standalone-build (3.0.11.1-26-g08fb709-1) unstable; urgency=low
 

@@ -1,0 +1,6 @@
+staging/zotero-libreoffice-integration/chrome*		usr/share/xul-ext/libreoffice-zotero-integration/
+staging/zotero-libreoffice-integration/defaults		usr/share/xul-ext/libreoffice-zotero-integration/
+staging/zotero-libreoffice-integration/install*		usr/share/xul-ext/libreoffice-zotero-integration/
+staging/zotero-libreoffice-integration/resource		usr/share/xul-ext/libreoffice-zotero-integration/
+staging/zotero-libreoffice-integration/components	usr/share/xul-ext/libreoffice-zotero-integration/
+

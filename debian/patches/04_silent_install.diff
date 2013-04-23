@@ -1,3 +1,8 @@
+From: Michele Cane <michele.cane@gmail.com>
+Subject: do not ask installation from GUI
+Origin: vendor, Debian
+Last-Updated: 2013-04-23
+
 Index: zotero-standalone-build/modules/zotero-libreoffice-integration/resource/installer.jsm
 ===================================================================
 --- zotero-standalone-build.orig/modules/zotero-libreoffice-integration/resource/installer.jsm	2013-04-01 21:35:13.000000000 +0200
