@@ -1,6 +1,10 @@
-zotero-standalone-build (4.0.6-1~1) UNRELEASED; urgency=low
+zotero-standalone-build (4.0.6-1) experimental; urgency=low
 
-  * New Upstream release (Closes: #706006 #7060079.
+  * New Upstream release
+  * debian/control: rename zotero-libreoffice-integration
+    to libreoffice-zotero-integration (Closes: #706006).
+  * debian/zotero-standalone.postinst and debian/zotero-standalone.postinst:
+    drop unopkg and use unzip (Closes: #706007).
 
  -- Michele Cane <michele.cane@gmail.com>  Tue, 23 Apr 2013 12:22:14 +0200
 
